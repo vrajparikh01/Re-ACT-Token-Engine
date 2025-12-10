@@ -61,7 +61,7 @@ contract BaseScript is Script {
         }
     }
 
-    function getDeployer() public returns (address) {
+    function getDeployer() public view returns (address) {
         address[] memory wallets = vm.getWallets();
 
         require(wallets.length > 0, "No wallets found");
