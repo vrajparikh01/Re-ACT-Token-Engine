@@ -1,167 +1,167 @@
-# Uniswap v4 Hook Template
+# 📘 Re:ACT Cycle Engine
+A Hook-Driven, Swap-Reactive Token Flow System for Uniswap v4
 
-**A template for writing Uniswap v4 Hooks 🦄**
+## 🚀 Overview
 
-### Get Started
+The Re:ACT Cycle Engine (RCE) introduces a fully on-chain, swap-reactive token flow mechanism designed specifically for Uniswap v4 hooks. Instead of relying on predictable unlock schedules or centralized vesting logic, RCE uses a 5-phase reactive cycle that progresses every time a BUY swap occurs on the hooked pool.
 
-This template provides a starting point for writing Uniswap v4 Hooks, including a simple example and preconfigured test environment. Start by creating a new repository using the "Use this template" button at the top right of this page. Alternatively you can also click this link:
+This creates a token economy where:
+- Unlocks happen only during real market activity
+- Stabilizing sells are triggered only when the cycle dictates
+- Liquidity reinforcement occurs every 5th buy
+- Treasury reserves grow organically through LP token economics
+- Investors receive RLIQ Series Tokens representing token-side claims on injected liquidity
 
-[![Use this Template](https://img.shields.io/badge/Use%20this%20Template-101010?style=for-the-badge&logo=github)](https://github.com/uniswapfoundation/v4-template/generate)
+All logic occurs inside the v4 hook, making the entire system transparent, trustless, and dependent only on actual swap activity.
 
-1. The example hook [Counter.sol](src/Counter.sol) demonstrates the `beforeSwap()` and `afterSwap()` hooks
-2. The test template [Counter.t.sol](test/Counter.t.sol) preconfigures the v4 pool manager, test tokens, and test liquidity.
+RCE is optimized for projects that want:
+✔ Sustainable unlock schedules
+✔ Anti-dump supply flow
+✔ On-chain transparency
+✔ Programmatic liquidity reinforcement
+✔ Cycle-based token distribution
+✔ No external executors or cron jobs
 
-<details>
-<summary>Updating to v4-template:latest</summary>
+## ⚙️ Core Idea
 
-This template is actively maintained -- you can update the v4 dependencies, scripts, and helpers:
+Every BUY swap advances the engine to the next phase of the Re:ACT Cycle:
+Buy #1 → Activate Tokens  
+Buy #2 → Stabilizing Sell  
+Buy #3 → Activate Tokens  
+Buy #4 → Stabilizing Sell  
+Buy #5 → Liquidity Reinforcement Event (LRE)
+After the 5th buy, the cycle resets to phase 1.
 
-```bash
-git remote add template https://github.com/uniswapfoundation/v4-template
-git fetch template
-git merge template/main <BRANCH> --allow-unrelated-histories
-```
+This predictable but market-dependent structure makes token flow:
 
-</details>
+• Reactive
+• Controlled
+• Transparent
+• Sustainable
 
-### Requirements
+without requiring complex math or volatile indicators.
 
-This template is designed to work with Foundry (stable). If you are using Foundry Nightly, you may encounter compatibility issues. You can update your Foundry installation to the latest stable version by running:
+## 🔄 Atomic Actions (10-Point Version)
 
-```
-foundryup
-```
+These describe the full behavior of the engine in precise, judge-friendly, hackathon-ready language.
 
-To set up the project, run the following commands in your terminal to install dependencies and run the tests:
+1. The hook monitors every BUY swap in the pool.
+Each BUY increments the internal cycle counter from 1 → 5.
 
-```
-forge install
-forge test
-```
+2. On Cycle Phase 1 (Buy #1), a portion of locked tokens is activated.
+A fraction of the buy amount is moved from Dormant Supply to Active Cycle Supply.
 
-### Local Development
+3. On Cycle Phase 2 (Buy #2), the Active Cycle Supply is sold back into the pool.
+The resulting USDC accumulates in the Stability Reservoir.
 
-Other than writing unit tests (recommended!), you can only deploy & test hooks on [anvil](https://book.getfoundry.sh/anvil/) locally. Scripts are available in the `script/` directory, which can be used to deploy hooks, create pools, provide liquidity and swap tokens. The scripts support both local `anvil` environment as well as running them directly on a production network.
+4. On Cycle Phase 3 (Buy #3), new tokens are activated again.
+This ensures no unlocks occur without market activity.
 
-### Executing locally with using **Anvil**:
+5. On Cycle Phase 4 (Buy #4), the newly activated tokens are sold.
+Again, all USDC goes to the Stability Reservoir.
 
-1. Start Anvil (or fork a specific chain using anvil):
+6. On Cycle Phase 5 (Buy #5), the engine performs a Liquidity Reinforcement Event (LRE).
+All stored USDC from the reservoir is paired with newly unlocked tokens to create fresh LP.
 
-```bash
-anvil
-```
+7. LP tokens from every LRE are wrapped into RLIQ Series Tokens.
+Each completed cycle mints a new series:
+RLIQ-1, RLIQ-2, RLIQ-3, …
 
-or
+8. RLIQ Series Tokens represent the TOKEN-side claim on that specific LP.
+USDC from LP withdrawals always goes to the Treasury.
 
-```bash
-anvil --fork-url <YOUR_RPC_URL>
-```
+9. RLIQ Vesting Windows:
+50% unlockable after 30 days
+Remaining 50% unlockable after 75 days
 
-2. Execute scripts:
+10. The Treasury uses accumulated USDC for controlled buybacks during significant price drops.
+Team withdrawals are limited and rate-controlled to maintain alignment with users.
 
-```bash
-forge script script/00_DeployHook.s.sol \
-    --rpc-url http://localhost:8545 \
-    --private-key 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d \
-    --broadcast
-```
+## 🧩 System Components
 
-### Using **RPC URLs** (actual transactions):
+| Component                  | Description                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| **ReActCycleHook.sol**     | The main Uniswap v4 hook that manages cycle phases and executes atomic actions |
+| **TokenVault.sol**         | Stores the dormant/locked token supply                                         |
+| **StabilityReservoir.sol** | Holds USDC from Phase 2 and Phase 4 stabilizing sells                          |
+| **RLIQ.sol (ERC-1155)**    | Represents LP claim tokens for each cycle series                               |
+| **Treasury.sol**           | Stores USDC from LP redemptions and executes buybacks                          |
+| **Config.sol**             | Parameter storage (percent activation, sell ratio, vesting durations)          |
 
-:::info
-It is best to not store your private key even in .env or enter it directly in the command line. Instead use the `--account` flag to select your private key from your keystore.
-:::
+## 🧨 Uniswap v4 Hook Architecture
 
-### Follow these steps if you have not stored your private key in the keystore:
+The Re:ACT Cycle Engine is implemented entirely through a custom Uniswap v4 hook, leveraging the v4 permissionless architecture to execute token-economic logic inside the swap lifecycle.
+The hook integrates with the pool through the following key callbacks:
 
-<details>
+### 1. afterSwap()
 
-1. Add your private key to the keystore:
+The core of the engine — this is where each cycle action happens.
+On each BUY:
+- Increment cycle counter
+- Execute one of:
+  - Token Activation (Phases 1 & 3)
+  - Stabilizing Sell (Phases 2 & 4)
+  - Liquidity Reinforcement Event → LP Mint → RLIQ (Phase 5)
+- Log events for indexing
+- Reset counter after Phase 5
 
-```bash
-cast wallet import <SET_A_NAME_FOR_KEY> --interactive
-```
+This callback is wrapped inside the pool manager’s lock() mechanism to ensure atomicity and safety.
 
-2. You will prompted to enter your private key and set a password, fill and press enter:
+### 2. Internal Hook Storage & Accounting
 
-```
-Enter private key: <YOUR_PRIVATE_KEY>
-Enter keystore password: <SET_NEW_PASSWORD>
-```
+The hook uses its own internal storage for:
+Cycle phase counter (1 → 5)
+- Activated token amount
+- Reservoir USDC balance
+- Cycle ID (for RLIQ series)
+- Vesting timestamps
+- LP mapping for each RLIQ series
 
-You should see this:
+All state changes are deterministic and dependent only on the swaps occurring in the pool.
 
-```
-`<YOUR_WALLET_PRIVATE_KEY_NAME>` keystore was saved successfully. Address: <YOUR_WALLET_ADDRESS>
-```
+### 3. PoolManager Locking
 
-::: warning
-Use ```history -c``` to clear your command history.
-:::
+Every write action (sell, unlock, LP mint) is performed inside:
+PoolManager.Lock.lock(...)
 
-</details>
+This ensures:
+- Reentrancy safety
+- Unified execution context
+- Guaranteed state correctness
+- Hook-driven atomic state transitions
 
-1. Execute scripts:
+### 4. LP Minting & RLIQ Wrapping
 
-```bash
-forge script script/00_DeployHook.s.sol \
-    --rpc-url <YOUR_RPC_URL> \
-    --account <YOUR_WALLET_PRIVATE_KEY_NAME> \
-    --sender <YOUR_WALLET_ADDRESS> \
-    --broadcast
-```
+During Phase 5:
+1. The hook mints new LP using Reservoir USDC + newly unlocked tokens
+2. LP NFT is transferred to the hook
+3. The hook mints RLIQ-X ERC-1155 tokens to whitelisted investors
+4. The LP NFT is held internally until RLIQ redemption
 
-You will prompted to enter your wallet password, fill and press enter:
+This creates a fully traceable, cycle-indexed liquidity reinforcement system.
 
-```
-Enter keystore password: <YOUR_PASSWORD>
-```
+## 🌐 Why v4 Hooks Make This Possible
 
-### Key Modifications to note:
+Uniswap v4 allows hooks to be injected directly into the swap execution sequence.
+This gives the protocol full control over:
+- swap-triggered logic
+- internal accounting
+- conditional unlocks
+- reactive liquidity mechanics
+- LP creation
+- vesting operations
 
-1. Update the `token0` and `token1` addresses in the `BaseScript.sol` file to match the tokens you want to use in the network of your choice for sepolia and mainnet deployments.
-2. Update the `token0Amount` and `token1Amount` in the `CreatePoolAndAddLiquidity.s.sol` file to match the amount of tokens you want to provide liquidity with.
-3. Update the `token0Amount` and `token1Amount` in the `AddLiquidity.s.sol` file to match the amount of tokens you want to provide liquidity with.
-4. Update the `amountIn` and `amountOutMin` in the `Swap.s.sol` file to match the amount of tokens you want to swap.
+No oracles.
+No keepers.
+No external executors.
 
+Everything occurs because users trade.
 
-### Troubleshooting
+## 📦 Development (Eth Seploia Testnet)
 
-<details>
+- git clone https://github.com/vrajparikh01/Re-ACT-Token-Engine 
+- forge build
+- forge script script/01_DeployHook.s.sol --rpc-url $RPC_URL --broadcast --private-key $PRIVATE_KEY
+- Tests are very minimal for this hook project because I was concentrating on designing the protocol and hook so will work on tests after the hookathon and make it live
 
-#### Permission Denied
-
-When installing dependencies with `forge install`, Github may throw a `Permission Denied` error
-
-Typically caused by missing Github SSH keys, and can be resolved by following the steps [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
-
-Or [adding the keys to your ssh-agent](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#adding-your-ssh-key-to-the-ssh-agent), if you have already uploaded SSH keys
-
-#### Anvil fork test failures
-
-Some versions of Foundry may limit contract code size to ~25kb, which could prevent local tests to fail. You can resolve this by setting the `code-size-limit` flag
-
-```
-anvil --code-size-limit 40000
-```
-
-#### Hook deployment failures
-
-Hook deployment failures are caused by incorrect flags or incorrect salt mining
-
-1. Verify the flags are in agreement:
-   - `getHookCalls()` returns the correct flags
-   - `flags` provided to `HookMiner.find(...)`
-2. Verify salt mining is correct:
-   - In **forge test**: the _deployer_ for: `new Hook{salt: salt}(...)` and `HookMiner.find(deployer, ...)` are the same. This will be `address(this)`. If using `vm.prank`, the deployer will be the pranking address
-   - In **forge script**: the deployer must be the CREATE2 Proxy: `0x4e59b44847b379578588920cA78FbF26c0B4956C`
-     - If anvil does not have the CREATE2 deployer, your foundry may be out of date. You can update it with `foundryup`
-
-</details>
-
-### Additional Resources
-
-- [Uniswap v4 docs](https://docs.uniswap.org/contracts/v4/overview)
-- [v4-periphery](https://github.com/uniswap/v4-periphery)
-- [v4-core](https://github.com/uniswap/v4-core)
-- [v4-by-example](https://v4-by-example.org)
+#### Check the testnet transactions of hook on this address: 0xfecea7b046b4daface340c7a2fe924cf41b6d274
